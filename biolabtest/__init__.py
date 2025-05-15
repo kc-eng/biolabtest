@@ -2,55 +2,216 @@
 A simple package to print program texts exactly as they are.
 """
 
-PROGRAM1 = '''# Program 1
-def factorial(n):
-    if n == 0:
-        return 1
-    else:
-        return n * factorial(n-1)
+PROGRAM1 = '''
+1
+from Bio.Seq import Seq
 
-# Test the function
-n = 5
-print(f"The factorial of {n} is {factorial(n)}")'''
+dna_seq=Seq("ATGCGTACGTAGCTAGCTAGCTAGCTAGCTAGC")
+print("DNA Sequence: ", dna_seq)
 
-PROGRAM2 = '''# Program 2
-def fibonacci(n):
-    if n <= 1:
-        return n
-    else:
-        return fibonacci(n-1) + fibonacci(n-2)
+sliced_seq=dna_seq[3:11]
+print("Sliced Sequence: ", sliced_seq)
 
-# Print first 10 Fibonacci numbers
-for i in range(10):
-    print(fibonacci(i), end=" ")'''
+another_seq=Seq("TGCA")
+concatenated_seq=sliced_seq+another_seq
 
-PROGRAM3 = '''# Program 3
-def is_prime(n):
-    if n < 2:
-        return False
-    for i in range(2, int(n ** 0.5) + 1):
-        if n % i == 0:
-            return False
-    return True
+print("Concatenated: ",concatenated_seq)
 
-# Test numbers from 1 to 20
-for num in range(1, 21):
-    if is_prime(num):
-        print(f"{num} is prime")'''
+rna_seq=concatenated_seq.transcribe()
+print("RNA: ",rna_seq)
 
-PROGRAM4 = '''# Program 4 - Add your code here'''
+protein_seq=rna_seq.translate()
+print("Protein: ",protein_seq)
+********************************************************'''
 
-PROGRAM5 = '''# Program 5 - Add your code here'''
+PROGRAM2 = '''2
 
-PROGRAM6 = '''# Program 6 - Add your code here'''
+from Bio import SeqIO
 
-PROGRAM7 = '''# Program 7 - Add your code here'''
+def read_fasta(file_name):
+    for record in SeqIO.parse(file_name,"fasta"):
+        print("Header: ",record.description)
+        print("Sequence: ",record.seq)
+        print()
+   
 
-PROGRAM8 = '''# Program 8 - Add your code here'''
 
-PROGRAM9 = '''# Program 9 - Add your code here'''
+fasta_file="eg.fasta"
 
-PROGRAM10 = '''# Program 10 - Add your code here'''
+read_fasta(fasta_file)
+
+*********************************************************'''
+
+PROGRAM3 = '''3
+
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+
+dna_seq = Seq("AGTCTACGTACCCTAGGCCAAA")
+
+record = SeqRecord(
+    dna_seq,
+    id="seq1",
+    name="Example_gene",
+    description="Example gene sequence",
+    annotations={
+        "molecule_type": "DNA",  # Required for GenBank format
+        "gene": "Example gene",
+        "function": "hypothetical protein"
+    }
+)
+
+# Define output file path
+output_file = "example.gb"
+
+# Open file for writing (without 'with')
+ofile = open(output_file, "w")
+SeqIO.write(record, ofile, "genbank")
+ofile.close()  # Must manually close the file
+
+print("Written successfully")
+
+# Open file for reading (without 'with')
+ifile = open(output_file, "r")
+record_read = SeqIO.read(ifile, "genbank")
+ifile.close()  # Must manually close the file
+
+print(record_read)
+
+*************************************************************
+'''
+
+PROGRAM4 = '''4
+
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
+
+records=[]
+
+for record in SeqIO.parse("eg.fasta","fasta"):
+    new=SeqRecord(
+        record.seq,
+        id=record.id,
+        name="gene",
+        description=record.description,
+        annotations={
+            "molecule_type":"DNA"
+        }
+    )
+    records.append(new)
+   
+file=open("4th_genbank.gb","w")
+SeqIO.write(records,file,"genbank")
+file.close()
+
+file=open("4th_genbank.gb","r")
+for content in SeqIO.parse(file,"genbank"):
+    print(content)
+file.close()
+
+********************************************************************'''
+
+PROGRAM5 = '''from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.SeqFeature import SeqFeature, FeatureLocation
+
+record = SeqRecord(Seq("ATGCGTACGTAGCTAGCTAG"), id="seq1", name="random ass name", description="some description")
+record.annotations["gene"] = "ExampleGene"
+record.annotations["organism"]="New species"
+record.annotations["function"]="Hypothetical protein"
+record.features.append(SeqFeature(FeatureLocation(0, 21), type="gene"))
+print(record.name)
+print(record.id)
+print(record.description)
+print(record.annotations)
+print(record.features)
+'''
+
+PROGRAM6 = '''6
+
+from Bio import Entrez, SeqIO
+
+Entrez.email = "nikhilsingh.is22@bmsce.ac.in"
+handle = Entrez.efetch(db="nucleotide", id="NM_001301717", rettype="gb", retmode="text")
+
+record = SeqIO.read(handle, "genbank")
+print(record)
+print(record.id)
+print(record.description)
+# print(record.features)
+print(record.seq[:30])
+
+
+
+**************************************************************************************'''
+
+PROGRAM7 = '''7
+from Bio.Align import PairwiseAligner
+aligner = PairwiseAligner()
+alignment = aligner.align("AGTACACTGGT", "AGTACGCTGGT")
+print(alignment)
+print(alignment[0])
+print(alignment[2])
+print(alignment[0].score)
+
+
+
+************************************************************************'''
+
+PROGRAM8 = '''8
+
+import subprocess
+from Bio import AlignIO
+
+subprocess.run(["muscle", "-in", "eg.fasta", "-out", "aligned.fasta"])
+alignment = AlignIO.read("aligned.fasta", "fasta")
+
+print(alignment)
+
+
+************************************************************************************
+'''
+
+PROGRAM9 = '''from Bio import Phylo, AlignIO
+from Bio.Phylo.TreeConstruction import DistanceCalculator, DistanceTreeConstructor
+
+alignment = AlignIO.read("aligned.fasta", "fasta")
+dm = DistanceCalculator("identity").get_distance(alignment)
+tree = DistanceTreeConstructor().upgma(dm)
+
+Phylo.draw(tree)
+# Print ASCII tree
+Phylo.draw_ascii(tree)
+
+# Save to file
+Phylo.write(tree, "tree.newick", "newick")
+
+
+*********************************************************************************************'''
+
+PROGRAM10 = '''10
+
+from Bio.PDB import *
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 1. Download and parse PDB file (using mmCif format)
+pdb_id = "1A3N"  # Example: Hemoglobin
+pdbl = PDBList()
+cif_file = pdbl.retrieve_pdb_file(pdb_id, pdir=".", file_format="mmCif")
+structure = MMCIFParser().get_structure(pdb_id, cif_file)
+
+# 2. Get all atom coordinates
+atoms = np.array([atom.coord for atom in structure.get_atoms()])
+
+# 3. Simple 3D plot
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(*atoms.T, s=5, alpha=0.5)
+ax.set_title(f"{pdb_id} Structure")
+plt.tight_layout()
+plt.show()'''
 
 def print_program1():
     """Print the exact text of Program 1."""
